@@ -1,1 +1,1 @@
-SQL databse of banking system (savings)
+SQL database of banking system (savings)
