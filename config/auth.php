@@ -7,9 +7,11 @@ require_once 'database.php';
 function login($username, $password) {
     global $conn;
     
-    $username = $conn->real_escape_string($username);
-    $query = "SELECT id, username, password, role, full_name, employee_id, status FROM users WHERE username = '$username'";
-    $result = $conn->query($query);
+    $stmt = $conn->prepare("SELECT id, username, password, role, full_name, employee_id, status FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
     
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
@@ -112,6 +114,47 @@ function getUserByID($userID) {
         return $result->fetch_assoc();
     }
     return null;
+}
+
+// Register
+function registerUser($username, $password, $fullName, $email) {
+    global $conn;
+
+    // Check username
+    $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        return ['success' => false, 'message' => 'Username already exists'];
+    }
+
+    $stmt->close();
+
+    // Generate employee ID
+    $result = $conn->query("SELECT COUNT(*) as total FROM users");
+    $row = $result->fetch_assoc();
+
+    $nextNumber = $row['total'] + 1;
+    $employeeId = 'EMP' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+    // Hash password
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert
+    $stmt = $conn->prepare("
+        INSERT INTO users (employee_id, username, password, role, full_name, email, status)
+        VALUES (?, ?, ?, 'teller', ?, ?, 'active')
+    ");
+
+    $stmt->bind_param("sssss", $employeeId, $username, $hashedPassword, $fullName, $email);
+
+    if ($stmt->execute()) {
+        return ['success' => true];
+    } else {
+        return ['success' => false, 'message' => $stmt->error];
+    }
 }
 
 ?>

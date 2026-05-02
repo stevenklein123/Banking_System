@@ -79,7 +79,12 @@ if (isLoggedIn()) {
             </form>
             
             <div class="login-footer">
-                <p class="text-center"><small>Demo Credentials:<br>Admin: admin / admin<br>Teller: teller1 / admin</small></p>
+                <p class="text-center">
+                    <small>
+                        Don't have an account?
+                        <a href="register.php">Register here</a>
+                    </small>
+                </p>
             </div>
         </div>
     </div>

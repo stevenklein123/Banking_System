@@ -347,26 +347,6 @@ function getDailyTransactionSummary($date) {
 
 // ==================== HELPER FUNCTIONS ====================
 
-// Generate unique ID
-function generateUniqueID($prefix, $table, $column) {
-    global $conn;
-    $count = 1;
-    while (true) {
-        $id = $prefix . str_pad($count, 6, '0', STR_PAD_LEFT);
-        $result = $conn->query("SELECT id FROM $table WHERE $column = '$id'");
-        if ($result->num_rows == 0) {
-            return $id;
-        }
-        $count++;
-    }
-}
-
-// Sanitize input
-function sanitizeInput($input) {
-    global $conn;
-    return $conn->real_escape_string(trim($input));
-}
-
 // Format currency
 function formatCurrency($amount) {
     return '$' . number_format($amount, 2);
